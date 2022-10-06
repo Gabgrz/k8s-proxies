@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: haproxy-server
+  labels:
+    app: haproxy-server
+spec:
+  selector:
+    matchLabels:
+      app: haproxy-server
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: haproxy-server
+    spec:
+      containers:
+      - name: haproxy-server
+        image: dockerhub.paypalcorp.com/haproxy:2.6.0
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1000Mi
+        livenessProbe:
+          tcpSocket:
+            port: 6443
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+          periodSeconds: 10
+        ports:
+        - containerPort: 6443
+          name:  haproxy-server
+        volumeMounts:
+        - name: haproxy-server-cm
+          mountPath: /usr/local/etc/haproxy
+        - name: haproxy-server-tls
+          mountPath: /usr/local/etc/haproxy/tls
+      volumes:
+        - name: haproxy-server-cm
+          configMap:
+            name: haproxy-server-cm
+        - name: haproxy-server-tls
+          secret:
+            secretName: haproxy-server-tls
+      restartPolicy: Always

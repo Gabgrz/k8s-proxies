@@ -1,0 +1,53 @@
+admin:
+  access_log_path: /dev/null
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 1113
+node:
+  cluster: xoom-cluster
+  id: xoom-id
+static_resources:
+    listeners:
+      - address:
+          socket_address:
+            address: 0.0.0.0
+            port_value: 6443
+            protocol: TCP
+        filter_chains:
+        - filters:
+          - config:
+              access_log:
+              - config:
+                  path: /dev/stdout
+                name: envoy.file_access_log
+              cluster: gke-master
+              stat_prefix: gke-master
+            name: envoy.tcp_proxy
+          tls_context:
+            common_tls_context:
+              tls_certificates:
+              - certificate_chain:
+                  filename: /etc/envoy/tls/crt.pem
+                private_key:
+                  filename: /etc/envoy/tls/key.pem
+        name: gke-master
+    clusters:
+      - connect_timeout: 5.000s
+        tls_context:
+            common_tls_context:
+              validation_context: 
+        lb_policy: round_robin
+        load_assignment:
+          cluster_name: gke-master
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: 10.134.243.242
+                    port_value: 443
+            locality:
+              region: west-blah
+              zone: sjc-blah
+        name: gke-master

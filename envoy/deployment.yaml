@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: envoy-proxy
+  labels:
+    app: envoy-proxy
+spec:
+  selector:
+    matchLabels:
+      app: envoy-proxy
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: envoy-proxy
+    spec:
+      containers:
+      - name: envoy-proxy
+        image: dockerhub.paypalcorp.com/envoyproxy/envoy:v1.9.0
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1000Mi
+        livenessProbe:
+          tcpSocket:
+            port: 6443
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+          periodSeconds: 10
+        ports:
+        - containerPort: 6443
+          name:  envoy-proxy
+        volumeMounts:
+        - name: envoy-proxy-cm
+          mountPath: /etc/envoy
+        - name: envoy-proxy-tls
+          mountPath: /etc/envoy/tls
+      volumes:
+        - name: envoy-proxy-cm
+          configMap:
+            name: envoy-proxy-cm
+        - name: envoy-proxy-tls
+          secret:
+            secretName: envoy-proxy-tls
+      restartPolicy: Always
