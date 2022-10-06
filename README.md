@@ -13,8 +13,7 @@ This repository contains K8s resources to deploy a TCP Proxy using Envoy or HAPr
 ``` shell
 mkdir certs
 openssl genrsa 2048 > certs/key.pem
-openssl req -new -x509 -nodes -sha1 -days 3650 -key certs/key.pem \
-  -subj "/C=US/ST=CA/L=SF/O=PayPal/OU=dcos-kubernetes/CN=*" > certs/crt.pem
+openssl req -new -x509 -nodes -sha1 -days 3650 -key certs/key.pem > certs/crt.pem
 
 # Using HAProxy
 cat certs/crt.pem certs/key.pem > certs/haproxy.pem
