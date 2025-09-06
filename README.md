@@ -1,22 +1,22 @@
 # K8s API Proxies for Private Clusters
 
-This repository contains Kubernetes resources to deploy TCP proxies using **Envoy** or **HAProxy** to expose the Kubernetes API for private clusters. This is necessary to add private Kubernetes clusters to an ArgoCD instance.
+This repository contains Kubernetes resources to deploy TCP proxies using **Envoy** or **HAProxy** to expose the Kubernetes API for private clusters. This is necessary to add private Kubernetes clusters to an Argo CD instance.
 
 ## Overview
 
-This solution addresses the limitation where ArgoCD doesn't support HTTP proxies for adding private Kubernetes clusters. By using TCP proxies with TLS termination, you can securely expose your private cluster's API server to ArgoCD.
+This solution addresses the limitation where Argo CD doesn't support HTTP proxies for adding private Kubernetes clusters. By using TCP proxies with TLS termination, you can securely expose your private cluster's API server to Argo CD.
 
 ### Key Features
 
 - **Two Proxy Options**: Choose between Envoy or HAProxy based on your needs
 - **TLS Security**: Secure communication with TLS certificates
-- **ArgoCD Integration**: Complete setup for adding private clusters to ArgoCD
+- **Argo CD Integration**: Complete setup for adding private clusters to Argo CD
 - **Production Ready**: Includes health checks, resource limits, and proper configuration
 
 ## Prerequisites
 
 - Kubernetes cluster with kubectl access
-- ArgoCD instance running
+- Argo CD instance running
 - OpenSSL for certificate generation
 - Access to the private cluster you want to add to ArgoCD
 
@@ -81,7 +81,7 @@ cat certs/crt.pem certs/key.pem > certs/haproxy.pem
    kubectl get services -n <your_namespace> haproxy-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
    ```
 
-### 3. Add Cluster to ArgoCD
+### 3. Add Cluster to Argo CD
 
 1. **Generate cluster configuration** (run on the target cluster):
    ```bash
@@ -93,7 +93,7 @@ cat certs/crt.pem certs/key.pem > certs/haproxy.pem
    - Replace `<your_cluster_name>` with your cluster name
    - Replace `<envoy_or_haproxy_service>` with the service IP from step 2
 
-3. **Apply to ArgoCD cluster**:
+3. **Apply to Argo CD cluster**:
    ```bash
    kubectl apply -f cluster.yaml
    ```
@@ -114,12 +114,12 @@ cat certs/crt.pem certs/key.pem > certs/haproxy.pem
 - **Load Balancing**: Least connections
 - **Health Checks**: SSL check with verification disabled
 
-### ArgoCD Integration
+### Argo CD Integration
 
 The `argocd/` directory contains:
-- `sa.yaml`: ServiceAccount, ClusterRole, and ClusterRoleBinding for ArgoCD
-- `get_cluster_yaml.sh`: Script to generate ArgoCD cluster secret
-- Generated `cluster.yaml`: ArgoCD cluster configuration
+- `sa.yaml`: ServiceAccount, ClusterRole, and ClusterRoleBinding for Argo CD
+- `get_cluster_yaml.sh`: Script to generate Argo CD cluster secret
+- Generated `cluster.yaml`: Argo CD cluster configuration
 
 ## Security Considerations
 
@@ -137,7 +137,7 @@ The `argocd/` directory contains:
 
 1. **Certificate errors**: Ensure certificates are properly mounted and accessible
 2. **Connection refused**: Verify the target cluster IP/endpoint is correct
-3. **ArgoCD connection fails**: Check that the proxy service is accessible from ArgoCD
+3. **Argo CD connection fails**: Check that the proxy service is accessible from Argo CD
 4. **Permission denied**: Verify the ServiceAccount has proper RBAC permissions
 
 ### Debug Commands
@@ -151,7 +151,7 @@ kubectl logs -n <namespace> deployment/haproxy-server
 kubectl port-forward -n <namespace> service/envoy-proxy 6443:6443
 curl -k https://localhost:6443/version
 
-# Check ArgoCD cluster status
+# Check Argo CD cluster status
 kubectl get secrets -n argocd -l argocd.argoproj.io/secret-type=cluster
 ```
 
@@ -164,7 +164,7 @@ To remove all resources:
 kubectl delete -k envoy/ -n <your_namespace>
 kubectl delete -k haproxy/ -n <your_namespace>
 
-# Delete ArgoCD resources
+# Delete Argo CD resources
 kubectl delete -f argocd/sa.yaml
 kubectl delete -f argocd/cluster.yaml
 ```
